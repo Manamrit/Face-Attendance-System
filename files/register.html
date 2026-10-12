@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Register Person{% endblock %}
+{% block content %}
+    <h1>Register a New Person</h1>
+    <p class="subtitle">Type a name, then capture 6-8 photos from slightly different angles.</p>
+
+    <div class="video-box">
+        <img src="{{ url_for('register_feed') }}" alt="Registration camera feed">
+    </div>
+
+    <div class="card">
+        <label for="name">Person's name</label>
+        <input type="text" id="name" placeholder="e.g. Amrit">
+
+        <button id="captureBtn" onclick="capturePhoto()">📸 Capture Photo (<span id="count">0</span>/8)</button>
+        <button class="secondary" id="encodeBtn" onclick="runEncode()" style="margin-left:10px;">⚙️ Finish &amp; Build Encodings</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        let photoCount = 0;
+
+        async function capturePhoto() {
+            const name = document.getElementById("name").value.trim();
+            const status = document.getElementById("status");
+
+            if (!name) {
+                status.textContent = "Please enter a name first.";
+                status.style.color = "#f87171";
+                return;
+            }
+
+            photoCount += 1;
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("count", photoCount);
+
+            const res = await fetch("/capture_photo", { method: "POST", body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById("count").textContent = photoCount;
+                status.textContent = `Saved photo ${photoCount} for ${name}.`;
+                status.style.color = "#a3e635";
+            } else {
+                photoCount -= 1;
+                status.textContent = "Error: " + data.error;
+                status.style.color = "#f87171";
+            }
+        }
+
+        async function runEncode() {
+            const status = document.getElementById("status");
+            const encodeBtn = document.getElementById("encodeBtn");
+            encodeBtn.disabled = true;
+            status.textContent = "Building face encodings... this can take a moment.";
+            status.style.color = "#facc15";
+
+            const res = await fetch("/encode", { method: "POST" });
+            const data = await res.json();
+
+            encodeBtn.disabled = false;
+            if (data.success) {
+                status.textContent = `Done! ${data.count} face encodings saved. Go to Live Attendance to test it.`;
+                status.style.color = "#a3e635";
+                photoCount = 0;
+                document.getElementById("count").textContent = 0;
+                document.getElementById("name").value = "";
+            } else {
+                status.textContent = "Error: " + data.error;
+                status.style.color = "#f87171";
+            }
+        }
+    </script>
+{% endblock %}

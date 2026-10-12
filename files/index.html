@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Live Attendance{% endblock %}
+{% block content %}
+    <h1>Live Attendance</h1>
+    <p class="subtitle">Green box = recognized &amp; marked present &nbsp;•&nbsp; Red box = unknown face</p>
+    <div class="video-box">
+        <img src="{{ url_for('video_feed') }}" alt="Live camera feed">
+    </div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Attendance Records{% endblock %}
+{% block content %}
+    <h1>Attendance Records</h1>
+    <p class="subtitle">View who was marked present on any given day.</p>
+
+    <div class="card">
+        <form method="get" action="/attendance">
+            <label for="date">Select date</label>
+            <input type="date" id="date" name="date" value="{{ date_str }}" onchange="this.form.submit()">
+        </form>
+
+        {% if rows %}
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Time</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p style="margin-top:14px;"><span class="badge">{{ rows|length }} present</span></p>
+        {% else %}
+            <div class="empty-state">No attendance recorded for {{ date_str }}.</div>
+        {% endif %}
+    </div>
+{% endblock %}
